@@ -2,6 +2,7 @@ package org.launchcode.javawebdevtechjobspersistent.controllers;
 
 import org.launchcode.javawebdevtechjobspersistent.models.Employer;
 import org.launchcode.javawebdevtechjobspersistent.models.Job;
+import org.launchcode.javawebdevtechjobspersistent.models.Skill;
 import org.launchcode.javawebdevtechjobspersistent.models.data.EmployerRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.JobRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.SkillRepository;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by LaunchCode
@@ -22,8 +24,10 @@ public class HomeController {
 
     @Autowired
     private EmployerRepository employerRepository;
+
     @Autowired
     private JobRepository jobRepository;
+
     @Autowired
     private SkillRepository skillRepository;
 
@@ -55,14 +59,24 @@ public class HomeController {
         Employer employers = employerRepository.findById(employerId).orElse(new Employer());
         newJob.setEmployer(employers);
 
+        List<Skill> skillObject = (List<Skill>) skillRepository.findAllById(skills);
+        newJob.setSkills(skillObject);
+
         jobRepository.save(newJob);
         return "redirect:";
     }
 
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
+        Optional optJob = jobRepository.findById(jobId);
+        if (optJob.isPresent()) {
+            Job job = (Job) optJob.get();
+            model.addAttribute("job", job);
+            return "view";
+        } else {
+            return "redirect:../";
+        }
 
-        return "view";
     }
 
 
